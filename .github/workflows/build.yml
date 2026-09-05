@@ -23,56 +23,11 @@ jobs:
 
 
       - name: Build
-        id: build
-        continue-on-error: true
         run: ./gradlew build --stacktrace
 
       - name: Upload jar
-        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: aspect-visuals
           path: build/libs/*.jar
           if-no-files-found: error
-
-      # Временный шаг: печатает фактический API рендера 1.21.4.
-      # Удаляется, как только шейдерный слой переведён на него.
-      - name: Разведка API рендера
-        if: always()
-        run: |
-          set +e
-          ./gradlew --quiet --console=plain :dependencies --configuration compileClasspath > /dev/null 2>&1
-
-          NAMED=""
-          for J in $(find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
-            if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/gl/ShaderProgram.class"; then NAMED="$J"; break; fi
-          done
-          CLIENT=/home/runner/.gradle/caches/fabric-loom/1.21.4/minecraft-client.jar
-
-          echo "== position_color.json"
-          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_color.json
-
-          echo "== position_tex_color.json"
-          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_tex_color.json
-
-          echo "== position_tex_color.fsh"
-          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_tex_color.fsh
-
-          echo "== rendertype_text.json"
-          unzip -p "$CLIENT" assets/minecraft/shaders/core/rendertype_text.json
-
-          echo "== ShaderProgramDefinition"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgramDefinition 2>&1 | head -25
-
-          echo "== Defines"
-          javap -cp "$NAMED" net.minecraft.client.gl.Defines 2>&1 | head -25
-
-          echo "== идентификаторы ключей"
-          unzip -p "$NAMED" net/minecraft/client/gl/ShaderProgramKeys.class 2>/dev/null | strings | grep -E "^core/|^minecraft$" | head -20
-
-          echo "== GlUniform полностью"
-          javap -cp "$NAMED" net.minecraft.client.gl.GlUniform 2>&1 | sed -n "20,60p"
-
-          echo "== ShaderProgram полностью"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgram 2>&1 | head -20
-          exit 0

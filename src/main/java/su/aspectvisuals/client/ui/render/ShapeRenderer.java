@@ -1,7 +1,6 @@
 package su.aspectvisuals.client.ui.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
@@ -52,14 +51,14 @@ public final class ShapeRenderer {
         // окажутся не в том порядке относительно текста и иконок
         context.draw();
 
-        setVec4(program, "AspectRect", x, y, width, height);
-        setVec4(program, "AspectRadius", radius[0], radius[1], radius[2], radius[3]);
-        setColor(program, "AspectBorderColor", borderArgb);
-        setColor(program, "AspectGradient", gradient);
-        setVec2(program, "AspectParams", border, softness);
+        AspectShaders.setVec4(program, "AspectRect", x, y, width, height);
+        AspectShaders.setVec4(program, "AspectRadius", radius[0], radius[1], radius[2], radius[3]);
+        AspectShaders.setColor(program, "AspectBorderColor", borderArgb);
+        AspectShaders.setColor(program, "AspectGradient", gradient);
+        AspectShaders.setVec2(program, "AspectParams", border, softness);
 
         float[] clip = UiClip.current();
-        setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
+        AspectShaders.setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
 
         float pad = PADDING + border + softness * 3f;
         float left = x - pad;
@@ -82,27 +81,5 @@ public final class ShapeRenderer {
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         RenderSystem.disableBlend();
-    }
-
-    private static void setVec4(ShaderProgram program, String name, float a, float b, float c, float d) {
-        GlUniform uniform = program.getUniform(name);
-        if (uniform != null) {
-            uniform.set(a, b, c, d);
-        }
-    }
-
-    private static void setVec2(ShaderProgram program, String name, float a, float b) {
-        GlUniform uniform = program.getUniform(name);
-        if (uniform != null) {
-            uniform.set(a, b);
-        }
-    }
-
-    private static void setColor(ShaderProgram program, String name, int argb) {
-        setVec4(program, name,
-                ((argb >> 16) & 0xFF) / 255f,
-                ((argb >> 8) & 0xFF) / 255f,
-                (argb & 0xFF) / 255f,
-                ((argb >>> 24) & 0xFF) / 255f);
     }
 }

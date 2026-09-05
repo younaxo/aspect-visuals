@@ -1,38 +1,83 @@
 package su.aspectvisuals.client.ui.render;
 
-import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.Defines;
+import net.minecraft.client.gl.GlUniform;
+import net.minecraft.client.gl.ShaderLoader;
 import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.gl.ShaderProgramKey;
 import net.minecraft.client.render.VertexFormats;
 import su.aspectvisuals.client.AspectVisuals;
 
 /**
  * Собственные core-шейдеры интерфейса.
  *
- * Программы живут между перезагрузками ресурсов не сами по себе: Minecraft
- * пересоздаёт их и вызывает колбэк заново, поэтому ссылку каждый раз обновляем,
- * а рендер до первой загрузки умеет работать без шейдера.
+ * Программа описывается ключом: идентификатор описания, формат вершин и набор
+ * директив препроцессора. Загрузчик компилирует её при первом обращении и
+ * пересобирает после перезагрузки ресурсов, поэтому ссылку не кешируем —
+ * иначе после смены набора ресурсов остался бы указатель на удалённую
+ * программу. Пока загрузчика нет (ранняя инициализация) возвращается null,
+ * и рендер уходит на запасной путь.
  */
 public final class AspectShaders {
-    private static ShaderProgram shape;
-    private static ShaderProgram text;
+    private static final ShaderProgramKey SHAPE = new ShaderProgramKey(
+            AspectVisuals.id("core/aspect_shape"),
+            VertexFormats.POSITION_COLOR,
+            Defines.EMPTY);
+
+    private static final ShaderProgramKey TEXT = new ShaderProgramKey(
+            AspectVisuals.id("core/aspect_text"),
+            VertexFormats.POSITION_TEXTURE_COLOR,
+            Defines.EMPTY);
 
     private AspectShaders() {
     }
 
-    public static void register() {
-        CoreShaderRegistrationCallback.EVENT.register(context -> {
-            context.register(AspectVisuals.id("aspect_shape"), VertexFormats.POSITION_COLOR,
-                    program -> shape = program);
-            context.register(AspectVisuals.id("aspect_text"), VertexFormats.POSITION_TEXTURE_COLOR,
-                    program -> text = program);
-        });
-    }
-
     public static ShaderProgram shape() {
-        return shape;
+        return program(SHAPE);
     }
 
     public static ShaderProgram text() {
-        return text;
+        return program(TEXT);
+    }
+
+    /**
+     * Униформы задаются по имени: программа могла не объявить её, если шейдер
+     * заменён набором ресурсов, и тогда запись просто пропускается.
+     */
+    public static void setVec4(ShaderProgram program, String name, float x, float y, float z, float w) {
+        GlUniform uniform = program.getUniform(name);
+        if (uniform != null) {
+            uniform.set(x, y, z, w);
+        }
+    }
+
+    public static void setVec2(ShaderProgram program, String name, float x, float y) {
+        GlUniform uniform = program.getUniform(name);
+        if (uniform != null) {
+            uniform.set(x, y);
+        }
+    }
+
+    /** Цвет ARGB раскладывается в нормированный RGBA. */
+    public static void setColor(ShaderProgram program, String name, int argb) {
+        setVec4(program, name,
+                ((argb >> 16) & 0xFF) / 255f,
+                ((argb >> 8) & 0xFF) / 255f,
+                (argb & 0xFF) / 255f,
+                ((argb >>> 24) & 0xFF) / 255f);
+    }
+
+    private static ShaderProgram program(ShaderProgramKey key) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null) {
+            return null;
+        }
+        ShaderLoader loader = client.getShaderLoader();
+        if (loader == null) {
+            return null;
+        }
+        // Загрузчик сам держит кеш и сам сообщает об ошибке компиляции
+        return loader.getOrCreateProgram(key);
     }
 }

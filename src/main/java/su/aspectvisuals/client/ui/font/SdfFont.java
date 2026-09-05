@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.GlUniform;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
@@ -158,9 +157,9 @@ public final class SdfFont {
         UiTextures.ensureSmooth(atlas);
         context.draw();
 
-        setVec2(program, "AspectTextParams", spread * size, 0f);
+        AspectShaders.setVec2(program, "AspectTextParams", spread * size, 0f);
         float[] clip = UiClip.current();
-        setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
+        AspectShaders.setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -217,19 +216,5 @@ public final class SdfFont {
         buffer.vertex(matrix, left, bottom, 0f).texture(u0, v1).color(color);
         buffer.vertex(matrix, right, bottom, 0f).texture(u1, v1).color(color);
         buffer.vertex(matrix, right, top, 0f).texture(u1, v0).color(color);
-    }
-
-    private static void setVec2(ShaderProgram program, String name, float a, float b) {
-        GlUniform uniform = program.getUniform(name);
-        if (uniform != null) {
-            uniform.set(a, b);
-        }
-    }
-
-    private static void setVec4(ShaderProgram program, String name, float a, float b, float c, float d) {
-        GlUniform uniform = program.getUniform(name);
-        if (uniform != null) {
-            uniform.set(a, b, c, d);
-        }
     }
 }
