@@ -8,6 +8,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import su.aspectvisuals.client.AspectVisuals;
+import su.aspectvisuals.client.ui.font.AspectFont;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +43,7 @@ public final class UiTextures {
                     @Override
                     public void reload(ResourceManager manager) {
                         configured.clear();
+                        AspectFont.invalidate();
                     }
                 });
     }

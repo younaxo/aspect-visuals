@@ -14,17 +14,25 @@ import su.aspectvisuals.client.AspectVisuals;
  */
 public final class AspectShaders {
     private static ShaderProgram shape;
+    private static ShaderProgram text;
 
     private AspectShaders() {
     }
 
     public static void register() {
-        CoreShaderRegistrationCallback.EVENT.register(context ->
-                context.register(AspectVisuals.id("aspect_shape"), VertexFormats.POSITION_COLOR,
-                        program -> shape = program));
+        CoreShaderRegistrationCallback.EVENT.register(context -> {
+            context.register(AspectVisuals.id("aspect_shape"), VertexFormats.POSITION_COLOR,
+                    program -> shape = program);
+            context.register(AspectVisuals.id("aspect_text"), VertexFormats.POSITION_TEXTURE_COLOR,
+                    program -> text = program);
+        });
     }
 
     public static ShaderProgram shape() {
         return shape;
+    }
+
+    public static ShaderProgram text() {
+        return text;
     }
 }
