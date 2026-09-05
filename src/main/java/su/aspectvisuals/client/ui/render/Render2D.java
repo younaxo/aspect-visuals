@@ -4,131 +4,182 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import su.aspectvisuals.client.ui.theme.AspectColors;
+import su.aspectvisuals.client.ui.theme.AspectSizes;
 
 /**
  * Примитивы интерфейса Aspect Visuals.
  *
- * Скругления рисуются построчно: DrawContext умеет только целочисленные
- * прямоугольники, поэтому сглаживание углов делается покрытием — крайние
- * пиксели строки получают пониженную альфу. Это дешевле собственного
- * шейдера и не ломает состояние рендера Minecraft.
+ * Все методы принимают координаты раскладки (единица равна логическому пикселю
+ * Minecraft), но рисуют в пространстве физических пикселей: матрица ужимается
+ * в {@code 1 / scale}, координаты умножаются на {@code scale}. Благодаря этому
+ * дробные позиции доживают до растеризации, а сглаживание считается по реальной
+ * плотности экрана, а не по сетке логических пикселей.
+ *
+ * Форма, граница и тень считаются одним шейдером через поле расстояния, поэтому
+ * скругления остаются гладкими при любом GUI Scale и разрешении.
  */
 public final class Render2D {
     /** Иконки растеризованы в 4x от 16 пикселей макета. */
     private static final int ICON_SOURCE = 64;
 
+    private static final float[] SQUARE = {0f, 0f, 0f, 0f};
+
     private Render2D() {
     }
 
     public static void rect(DrawContext context, float x, float y, float width, float height, int color) {
-        if (width <= 0 || height <= 0 || alpha(color) == 0) {
+        shape(context, x, y, width, height, SQUARE, color, color, 0f, 0, 0f);
+    }
+
+    public static void gradient(DrawContext context, float x, float y, float width, float height, int top, int bottom) {
+        shape(context, x, y, width, height, SQUARE, top, bottom, 0f, 0, 0f);
+    }
+
+    public static void roundedRect(DrawContext context, float x, float y, float width, float height,
+                                   float radius, int color) {
+        shape(context, x, y, width, height, corners(radius), color, color, 0f, 0, 0f);
+    }
+
+    public static void roundedGradient(DrawContext context, float x, float y, float width, float height,
+                                       float radius, int top, int bottom) {
+        shape(context, x, y, width, height, corners(radius), top, bottom, 0f, 0, 0f);
+    }
+
+    /** Разные радиусы по углам: левый верхний, правый верхний, правый нижний, левый нижний. */
+    public static void roundedRect(DrawContext context, float x, float y, float width, float height,
+                                   float[] radius, int color) {
+        shape(context, x, y, width, height, radius, color, color, 0f, 0, 0f);
+    }
+
+    /**
+     * Заливка с границей одной фигурой: контур считается из того же поля
+     * расстояния, поэтому на скруглениях нет стыков отдельных полос.
+     */
+    public static void filledBorder(DrawContext context, float x, float y, float width, float height,
+                                    float radius, int fill, float thickness, int borderColor) {
+        shape(context, x, y, width, height, corners(radius), fill, fill, thickness, borderColor, 0f);
+    }
+
+    /** Только контур, без заливки. */
+    public static void border(DrawContext context, float x, float y, float width, float height,
+                              float thickness, int color) {
+        border(context, x, y, width, height, 0f, thickness, color);
+    }
+
+    public static void border(DrawContext context, float x, float y, float width, float height,
+                              float radius, float thickness, int color) {
+        shape(context, x, y, width, height, corners(radius), 0x00000000, 0x00000000, thickness, color, 0f);
+    }
+
+    /**
+     * Мягкая тень из макета: смещение вниз на 24 и растушёвка 32, как задано
+     * в эффекте Drop Shadow. Растушёвка идёт полем расстояния, а не набором
+     * вложенных прямоугольников с падающей альфой.
+     */
+    public static void shadow(DrawContext context, float x, float y, float width, float height, float radius) {
+        shadow(context, x, y, width, height, radius,
+                AspectColors.SHADOW, AspectSizes.SHADOW_BLUR, AspectSizes.SHADOW_OFFSET_Y);
+    }
+
+    public static void shadow(DrawContext context, float x, float y, float width, float height,
+                              float radius, int color, float blur, float offsetY) {
+        shape(context, x, y + offsetY, width, height, corners(radius), color, color, 0f, 0, blur);
+    }
+
+    private static void shape(DrawContext context, float x, float y, float width, float height,
+                              float[] radius, int fill, int gradient, float border, int borderColor, float softness) {
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (alpha(fill) == 0 && alpha(gradient) == 0 && (border <= 0f || alpha(borderColor) == 0)) {
+            return;
+        }
+        if (UiClip.cullsEverything()) {
+            return;
+        }
+
+        if (!ShapeRenderer.ready()) {
+            fallback(context, x, y, width, height, fill);
+            return;
+        }
+
+        float scale = UiScale.push(context);
+        try {
+            float[] scaled = {
+                    radius[0] * scale, radius[1] * scale, radius[2] * scale, radius[3] * scale};
+            ShapeRenderer.draw(context,
+                    x * scale, y * scale, width * scale, height * scale,
+                    scaled, fill, gradient, border * scale, borderColor, softness * scale);
+        } finally {
+            UiScale.pop(context);
+        }
+    }
+
+    /** Пока шейдер не загружен, интерфейс не должен пропадать. */
+    private static void fallback(DrawContext context, float x, float y, float width, float height, int color) {
+        if (alpha(color) == 0) {
             return;
         }
         context.fill(Math.round(x), Math.round(y), Math.round(x + width), Math.round(y + height), color);
     }
 
-    public static void gradient(DrawContext context, float x, float y, float width, float height, int top, int bottom) {
-        if (width <= 0 || height <= 0) {
-            return;
-        }
-        context.fillGradient(Math.round(x), Math.round(y), Math.round(x + width), Math.round(y + height), top, bottom);
-    }
-
-    public static void roundedRect(DrawContext context, float x, float y, float width, float height, float radius, int color) {
-        if (width <= 0 || height <= 0 || alpha(color) == 0) {
-            return;
-        }
-
-        float r = Math.min(radius, Math.min(width, height) / 2f);
-        if (r < 0.5f) {
-            rect(context, x, y, width, height, color);
-            return;
-        }
-
-        int left = Math.round(x);
-        int right = Math.round(x + width);
-        int top = Math.round(y);
-        int bottom = Math.round(y + height);
-        int rows = (int) Math.ceil(r);
-
-        // Середина одним прямоугольником, скруглённые полосы — построчно
-        context.fill(left, top + rows, right, bottom - rows, color);
-
-        for (int row = 0; row < rows; row++) {
-            float centerOffset = r - (row + 0.5f);
-            float inset = r - (float) Math.sqrt(Math.max(0f, r * r - centerOffset * centerOffset));
-            int solid = (int) Math.ceil(inset);
-            float coverage = 1f - (solid - inset);
-
-            int innerLeft = left + solid;
-            int innerRight = right - solid;
-            if (innerRight <= innerLeft) {
-                continue;
-            }
-
-            context.fill(innerLeft, top + row, innerRight, top + row + 1, color);
-            context.fill(innerLeft, bottom - row - 1, innerRight, bottom - row, color);
-
-            if (coverage > 0.02f && solid > 0) {
-                int edge = AspectColors.withAlpha(color, coverage);
-                context.fill(innerLeft - 1, top + row, innerLeft, top + row + 1, edge);
-                context.fill(innerRight, top + row, innerRight + 1, top + row + 1, edge);
-                context.fill(innerLeft - 1, bottom - row - 1, innerLeft, bottom - row, edge);
-                context.fill(innerRight, bottom - row - 1, innerRight + 1, bottom - row, edge);
-            }
-        }
-    }
-
-    /**
-     * Рамка карточки: контур рисуется четырьмя полосами, чтобы не затирать
-     * уже нарисованный фон внутри.
-     */
-    public static void border(DrawContext context, float x, float y, float width, float height, float thickness, int color) {
-        if (alpha(color) == 0 || thickness <= 0 || width <= 0 || height <= 0) {
-            return;
-        }
-        float t = Math.max(1f, thickness);
-        rect(context, x, y, width, t, color);
-        rect(context, x, y + height - t, width, t, color);
-        rect(context, x, y + t, t, height - t * 2, color);
-        rect(context, x + width - t, y + t, t, height - t * 2, color);
-    }
-
-    /** Мягкая тень из макета: смещение вниз и растушёвка слоями. */
-    public static void shadow(DrawContext context, float x, float y, float width, float height, float radius) {
-        int layers = 6;
-        for (int i = layers; i > 0; i--) {
-            float spread = i * 2f;
-            int color = AspectColors.withAlpha(AspectColors.SHADOW, 1f - (i - 1) / (float) layers);
-            roundedRect(context, x - spread, y - spread + 4f, width + spread * 2, height + spread * 2, radius + spread, color);
-        }
+    private static float[] corners(float radius) {
+        return new float[]{radius, radius, radius, radius};
     }
 
     public static void texture(DrawContext context, Identifier texture, float x, float y, float size, int color) {
         texture(context, texture, x, y, size, size, color);
     }
 
-    public static void texture(DrawContext context, Identifier texture, float x, float y, float width, float height, int color) {
-        // Иконки набора хранятся в 4x от размера макета
+    public static void texture(DrawContext context, Identifier texture, float x, float y,
+                               float width, float height, int color) {
         texture(context, texture, x, y, width, height, ICON_SOURCE, ICON_SOURCE, color);
     }
 
     /**
-     * Отрисовка текстуры произвольного размера: аватар с сайта приходит
-     * не в 64x64, поэтому исходный размер задаётся явно.
+     * Отрисовка текстуры произвольного размера. Рисуем в пространстве физических
+     * пикселей, поэтому источник высокой плотности уменьшается линейной
+     * фильтрацией, а не размазывается точечной выборкой логической сетки.
      */
     public static void texture(DrawContext context, Identifier texture, float x, float y, float width, float height,
                                int sourceWidth, int sourceHeight, int color) {
         if (alpha(color) == 0 || width <= 0 || height <= 0 || sourceWidth <= 0 || sourceHeight <= 0) {
             return;
         }
+        if (UiClip.cullsEverything()) {
+            return;
+        }
 
-        context.getMatrices().push();
-        context.getMatrices().translate(x, y, 0f);
-        context.getMatrices().scale(width / sourceWidth, height / sourceHeight, 1f);
-        context.drawTexture(RenderLayer::getGuiTextured, texture, 0, 0, 0f, 0f,
-                sourceWidth, sourceHeight, sourceWidth, sourceHeight, color);
-        context.getMatrices().pop();
+        float scale = UiScale.push(context);
+        try {
+            context.getMatrices().translate(x * scale, y * scale, 0f);
+            context.getMatrices().scale(width * scale / sourceWidth, height * scale / sourceHeight, 1f);
+            context.drawTexture(RenderLayer::getGuiTextured, texture, 0, 0, 0f, 0f,
+                    sourceWidth, sourceHeight, sourceWidth, sourceHeight, color);
+        } finally {
+            UiScale.pop(context);
+        }
+    }
+
+    /** Обрезка задаётся в координатах раскладки, применяется в физических. */
+    public static void pushClip(DrawContext context, float x, float y, float width, float height) {
+        context.draw();
+        float scale = UiScale.factor();
+        UiClip.push(x * scale, y * scale, width * scale, height * scale);
+
+        // Ножницы оставляем как грубое отсечение: расширяем наружу, чтобы они
+        // не срезали сглаживание, точную границу задаёт шейдер
+        context.enableScissor(
+                (int) Math.floor(x),
+                (int) Math.floor(y),
+                (int) Math.ceil(x + width),
+                (int) Math.ceil(y + height));
+    }
+
+    public static void popClip(DrawContext context) {
+        context.draw();
+        context.disableScissor();
+        UiClip.pop();
     }
 
     public static boolean hovered(double mouseX, double mouseY, float x, float y, float width, float height) {

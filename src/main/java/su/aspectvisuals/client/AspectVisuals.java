@@ -13,6 +13,7 @@ import su.aspectvisuals.client.config.ConfigManager;
 import su.aspectvisuals.client.hud.HudManager;
 import su.aspectvisuals.client.module.ModuleManager;
 import su.aspectvisuals.client.ui.Keybinds;
+import su.aspectvisuals.client.ui.render.AspectShaders;
 import su.aspectvisuals.client.waypoint.WaypointStore;
 
 public final class AspectVisuals implements ClientModInitializer {
@@ -49,6 +50,7 @@ public final class AspectVisuals implements ClientModInitializer {
         account.load();
 
         Keybinds.register();
+        AspectShaders.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             Keybinds.tick(client);
