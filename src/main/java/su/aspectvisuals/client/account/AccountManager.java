@@ -44,6 +44,7 @@ public final class AccountManager {
 
     private long nextPollAt;
     private long nextProfileAt;
+    private long nextRefreshAt;
     private boolean requestInFlight;
 
     public AccountManager(String clientVersion) {
@@ -190,7 +191,7 @@ public final class AccountManager {
 
         if (now >= nextProfileAt) {
             fetchProfile();
-        } else if (session.shouldRefresh()) {
+        } else if (session.shouldRefresh() && now >= nextRefreshAt) {
             refreshSession();
         }
     }
@@ -278,6 +279,8 @@ public final class AccountManager {
 
     private void refreshSession() {
         requestInFlight = true;
+        // Неудачное продление не должно повторяться каждый тик
+        nextRefreshAt = System.currentTimeMillis() + RETRY_AFTER_FAILURE_MS;
 
         api.refresh(session.token()).whenComplete((refreshed, error) -> MinecraftClient.getInstance().execute(() -> {
             requestInFlight = false;

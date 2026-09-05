@@ -157,18 +157,23 @@ public final class AspectApiClient {
             throw new ApiException(ApiError.MALFORMED);
         }
 
+        String code = json.has("error") && json.get("error").isJsonPrimitive() ? json.get("error").getAsString() : null;
         int status = response.statusCode();
-        if (status >= 200 && status < 300) {
+
+        // Пока вход не подтверждён, сервер отвечает 202 с кодом причины:
+        // успешный статус здесь ещё не значит, что сессия выдана
+        if (status >= 200 && status < 300 && code == null) {
             return json;
         }
 
-        String code = json.has("error") && json.get("error").isJsonPrimitive() ? json.get("error").getAsString() : null;
-        // 202 отдаётся, пока пользователь не подтвердил вход, — это не ошибка сети
-        ApiError error = status == 401 ? ApiError.UNAUTHORIZED : ApiError.fromCode(code);
-        if (status == 401 && "session_expired".equals(code)) {
-            error = ApiError.SESSION_EXPIRED;
+        if (status == 401) {
+            throw new ApiException("session_expired".equals(code) ? ApiError.SESSION_EXPIRED : ApiError.UNAUTHORIZED);
         }
-        throw new ApiException(error);
+        // Превышен лимит запросов — не ошибка входа, клиент должен сбавить темп
+        if (status == 429) {
+            throw new ApiException(ApiError.SLOW_DOWN);
+        }
+        throw new ApiException(ApiError.fromCode(code));
     }
 
     private static ClientSession toSession(JsonObject json) {
