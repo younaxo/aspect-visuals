@@ -1,0 +1,12 @@
+{
+  "name": "aspect-visuals-tools",
+  "private": true,
+  "type": "module",
+  "description": "Растеризация иконок интерфейса в текстуры клиента",
+  "scripts": {
+    "icons": "node render-icons.mjs"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}
