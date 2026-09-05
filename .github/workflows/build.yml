@@ -21,6 +21,54 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+
+      # Временный шаг: печатает фактический API рендера 1.21.4.
+      # Удаляется, как только шейдерный слой переведён на него.
+      - name: Разведка API рендера
+        run: |
+          set +e
+          ./gradlew --quiet --console=plain :dependencies --configuration compileClasspath > /dev/null 2>&1
+          MC=$(find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -iE "minecraft.*(named|merged)" | head -1)
+          echo "== jar: $MC"
+          FAPI=$(find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -i "fabric-rendering-v1" | head -3)
+          echo "== fabric rendering jars:"; echo "$FAPI"
+
+          echo "== ShaderProgramKey / ShaderLoader присутствуют?"
+          unzip -l "$MC" 2>/dev/null | grep -iE "gl/(ShaderProgram|ShaderLoader|CompiledShader|ShaderProgramKey)" | head -20
+
+          echo "== RenderSystem: методы про шейдеры"
+          javap -cp "$MC" com.mojang.blaze3d.systems.RenderSystem 2>/dev/null | grep -iE "shader|texture\(" | head -30
+
+          echo "== ShaderProgram"
+          javap -cp "$MC" net.minecraft.client.gl.ShaderProgram 2>/dev/null | head -30
+
+          echo "== ShaderProgramKey"
+          javap -cp "$MC" net.minecraft.client.gl.ShaderProgramKey 2>/dev/null | head -20
+          javap -cp "$MC" net.minecraft.client.gl.ShaderProgramKeys 2>/dev/null | head -10
+
+          echo "== ShaderProgramDefines"
+          javap -cp "$MC" net.minecraft.client.gl.ShaderProgramDefines 2>/dev/null | head -20
+
+          echo "== фабричные классы рендера v1"
+          for J in $FAPI; do unzip -l "$J" 2>/dev/null | grep -oE "rendering/v1/[A-Za-z]+\.class" ; done | sort -u | head -40
+
+          echo "== ванильные core-шейдеры в клиентском jar"
+          CLIENT=$(find ~/.gradle -name "client*.jar" 2>/dev/null | head -3)
+          for J in $CLIENT; do echo "-- $J"; unzip -l "$J" 2>/dev/null | grep -E "shaders/core/position_color" ; done
+
+          echo "== исходник position_color.fsh"
+          for J in $CLIENT; do unzip -p "$J" assets/minecraft/shaders/core/position_color.fsh 2>/dev/null && break; done
+
+          echo "== исходник position_color.vsh"
+          for J in $CLIENT; do unzip -p "$J" assets/minecraft/shaders/core/position_color.vsh 2>/dev/null && break; done
+
+          echo "== rendertype_gui.fsh (пример с uniform-блоками)"
+          for J in $CLIENT; do unzip -p "$J" assets/minecraft/shaders/core/rendertype_gui.fsh 2>/dev/null && break; done
+
+          echo "== DrawContext: draw/scissor"
+          javap -cp "$MC" net.minecraft.client.gui.DrawContext 2>/dev/null | grep -iE "draw\(|scissor|drawTexture" | head -20
+          exit 0
+
       - name: Build
         run: ./gradlew build --stacktrace
 
