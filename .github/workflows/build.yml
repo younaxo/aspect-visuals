@@ -43,51 +43,36 @@ jobs:
           set +e
           ./gradlew --quiet --console=plain :dependencies --configuration compileClasspath > /dev/null 2>&1
 
-          echo "== кандидаты jar"
-          find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -i "minecraft" | grep -viE "sources|javadoc" | sort -u | head -20
-
           NAMED=""
           for J in $(find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
             if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/gl/ShaderProgram.class"; then NAMED="$J"; break; fi
           done
-          echo "== named jar: $NAMED"
+          CLIENT=/home/runner/.gradle/caches/fabric-loom/1.21.4/minecraft-client.jar
 
-          echo "== классы net/minecraft/client/gl"
-          unzip -l "$NAMED" 2>/dev/null | grep -oE "net/minecraft/client/gl/[A-Za-z0-9$]+\.class" | sed "s|.*/||" | sort -u | head -60
+          echo "== position_color.json"
+          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_color.json
 
-          echo "== ShaderProgram"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgram 2>&1 | head -40
+          echo "== position_tex_color.json"
+          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_tex_color.json
 
-          echo "== ShaderProgramKey"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgramKey 2>&1 | head -20
+          echo "== position_tex_color.fsh"
+          unzip -p "$CLIENT" assets/minecraft/shaders/core/position_tex_color.fsh
 
-          echo "== ShaderProgramKeys"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgramKeys 2>&1 | head -15
+          echo "== rendertype_text.json"
+          unzip -p "$CLIENT" assets/minecraft/shaders/core/rendertype_text.json
 
-          echo "== ShaderProgramDefines"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgramDefines 2>&1 | head -25
+          echo "== ShaderProgramDefinition"
+          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgramDefinition 2>&1 | head -25
 
-          echo "== ShaderLoader"
-          javap -cp "$NAMED" net.minecraft.client.gl.ShaderLoader 2>&1 | head -30
+          echo "== Defines"
+          javap -cp "$NAMED" net.minecraft.client.gl.Defines 2>&1 | head -25
 
-          echo "== RenderSystem.setShader"
-          javap -cp "$NAMED" com.mojang.blaze3d.systems.RenderSystem 2>&1 | grep -iE "setShader|getShader" | head -20
+          echo "== идентификаторы ключей"
+          unzip -p "$NAMED" net/minecraft/client/gl/ShaderProgramKeys.class 2>/dev/null | strings | grep -E "^core/|^minecraft$" | head -20
 
-          echo "== MinecraftClient: доступ к загрузчику шейдеров"
-          javap -cp "$NAMED" net.minecraft.client.MinecraftClient 2>&1 | grep -iE "Shader|Loader" | head -20
+          echo "== GlUniform полностью"
+          javap -cp "$NAMED" net.minecraft.client.gl.GlUniform 2>&1 | sed -n "20,60p"
 
-          echo "== GlUniform"
-          javap -cp "$NAMED" net.minecraft.client.gl.GlUniform 2>&1 | grep -E "public|set" | head -30
-
-          echo "== ассеты: есть ли json у core-шейдеров"
-          for J in $(find ~/.gradle -name "*.jar" 2>/dev/null | grep -iE "minecraft.*(client|common|merged)" | head -6); do
-            N=$(unzip -l "$J" 2>/dev/null | grep -cE "shaders/core/position_color")
-            echo "-- $J : $N"
-            if [ "$N" -gt 0 ]; then
-              unzip -l "$J" | grep -E "shaders/core/position_color|shaders/include" | head -10
-              echo "---- position_color.vsh"; unzip -p "$J" assets/minecraft/shaders/core/position_color.vsh
-              echo "---- position_color.fsh"; unzip -p "$J" assets/minecraft/shaders/core/position_color.fsh
-              break
-            fi
-          done
+          echo "== ShaderProgram полностью"
+          javap -cp "$NAMED" net.minecraft.client.gl.ShaderProgram 2>&1 | head -20
           exit 0
