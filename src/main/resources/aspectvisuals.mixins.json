@@ -2,7 +2,9 @@
   "required": true,
   "package": "su.aspectvisuals.client.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": [],
+  "client": [
+    "SimpleOptionAccessor"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
