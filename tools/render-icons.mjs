@@ -3,9 +3,11 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Иконки хранятся вектором, а в игру попадают текстурами: Minecraft
-// не умеет SVG, а 4x-растеризация переживает любой GUI Scale.
-const SCALE = 4
+// Иконки хранятся вектором, а в игру попадают текстурами: Minecraft не умеет
+// SVG. Плотность 8x от размера в макете выбрана так, чтобы иконка 16 единиц
+// оставалась чёткой при GUI Scale 4 на 4K, где ей достаётся 64 физических
+// пикселя, и при этом уменьшение шло линейной фильтрацией без муара.
+const SCALE = 8
 
 const here = dirname(fileURLToPath(import.meta.url))
 const source = resolve(here, '..', 'src/main/resources/assets/aspectvisuals/icons')

@@ -19,8 +19,8 @@ import su.aspectvisuals.client.ui.theme.AspectSizes;
  * скругления остаются гладкими при любом GUI Scale и разрешении.
  */
 public final class Render2D {
-    /** Иконки растеризованы в 4x от 16 пикселей макета. */
-    private static final int ICON_SOURCE = 64;
+    /** Иконки растеризованы с запасом плотности относительно размера в макете. */
+    private static final int ICON_SOURCE = 128;
 
     private static final float[] SQUARE = {0f, 0f, 0f, 0f};
 
@@ -149,6 +149,8 @@ public final class Render2D {
         if (UiClip.cullsEverything()) {
             return;
         }
+
+        UiTextures.ensureSmooth(texture);
 
         float scale = UiScale.push(context);
         try {
