@@ -22,6 +22,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
 
+      - name: Build
+        id: build
+        continue-on-error: true
+        run: ./gradlew build --stacktrace
+
+      - name: Upload jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: aspect-visuals
+          path: build/libs/*.jar
+          if-no-files-found: error
+
       # Временный шаг: печатает фактический API рендера 1.21.4.
       # Удаляется, как только шейдерный слой переведён на него.
       - name: Разведка API рендера
@@ -68,13 +80,3 @@ jobs:
           echo "== DrawContext: draw/scissor"
           javap -cp "$MC" net.minecraft.client.gui.DrawContext 2>/dev/null | grep -iE "draw\(|scissor|drawTexture" | head -20
           exit 0
-
-      - name: Build
-        run: ./gradlew build --stacktrace
-
-      - name: Upload jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: aspect-visuals
-          path: build/libs/*.jar
-          if-no-files-found: error
