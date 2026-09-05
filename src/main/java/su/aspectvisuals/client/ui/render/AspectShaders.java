@@ -9,6 +9,9 @@ import net.minecraft.client.gl.ShaderProgramKey;
 import net.minecraft.client.render.VertexFormats;
 import su.aspectvisuals.client.AspectVisuals;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Собственные core-шейдеры интерфейса.
  *
@@ -29,6 +32,9 @@ public final class AspectShaders {
             AspectVisuals.id("core/aspect_text"),
             VertexFormats.POSITION_TEXTURE_COLOR,
             Defines.EMPTY);
+
+    /** Ключи, о недоступности которых уже сообщено: иначе запись каждый кадр. */
+    private static final Set<ShaderProgramKey> reported = new HashSet<>();
 
     private AspectShaders() {
     }
@@ -78,6 +84,18 @@ public final class AspectShaders {
             return null;
         }
         // Загрузчик сам держит кеш и сам сообщает об ошибке компиляции
-        return loader.getOrCreateProgram(key);
+        ShaderProgram program = loader.getOrCreateProgram(key);
+        if (program == null) {
+            // Без этого отсутствие программы выглядит как «интерфейс просто
+            // рисуется хуже»: отрисовка молча уходит на запасной путь
+            if (reported.add(key)) {
+                AspectVisuals.LOGGER.error(
+                        "Шейдер {} недоступен: интерфейс рисуется запасным путём без сглаживания",
+                        key.configId());
+            }
+        } else {
+            reported.remove(key);
+        }
+        return program;
     }
 }
