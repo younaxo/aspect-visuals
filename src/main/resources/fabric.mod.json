@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "aspectvisuals",
+  "version": "${version}",
+  "name": "Aspect Visuals",
+  "description": "Визуальный клиент Aspect Visuals: стеклянный интерфейс, HUD и профиль аккаунта с сайта.",
+  "authors": ["younaxo"],
+  "contact": {
+    "homepage": "https://aspectvisuals.su",
+    "sources": "https://github.com/younaxo/aspect-visuals",
+    "issues": "https://github.com/younaxo/aspect-visuals/issues"
+  },
+  "license": "ARR",
+  "icon": "assets/aspectvisuals/icons/logo.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["su.aspectvisuals.client.AspectVisuals"]
+  },
+  "mixins": [
+    {
+      "config": "aspectvisuals.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.9",
+    "fabric-api": "*",
+    "minecraft": "~1.21.4",
+    "java": ">=21"
+  }
+}
