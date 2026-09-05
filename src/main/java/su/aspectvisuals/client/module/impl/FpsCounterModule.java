@@ -1,6 +1,5 @@
 package su.aspectvisuals.client.module.impl;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import su.aspectvisuals.client.hud.HudAnchor;
 import su.aspectvisuals.client.hud.HudCard;
@@ -16,7 +15,7 @@ public class FpsCounterModule extends HudModule {
     }
 
     private String value() {
-        return MinecraftClient.getCurrentFps() + " fps";
+        return mc.getCurrentFps() + " fps";
     }
 
     @Override

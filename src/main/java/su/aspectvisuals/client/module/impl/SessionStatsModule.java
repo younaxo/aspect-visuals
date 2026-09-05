@@ -1,6 +1,5 @@
 package su.aspectvisuals.client.module.impl;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.PlayerListEntry;
 import su.aspectvisuals.client.hud.HudAnchor;
@@ -24,7 +23,7 @@ public class SessionStatsModule extends HudModule {
     }
 
     private String[] stats() {
-        return new String[]{MinecraftClient.getCurrentFps() + "fps", ping() + "ms", tps() + "tps"};
+        return new String[]{mc.getCurrentFps() + "fps", ping() + "ms", tps() + "tps"};
     }
 
     private int ping() {
