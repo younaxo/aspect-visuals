@@ -51,9 +51,8 @@ public class TextField extends Component {
         boolean hover = hovered(mouseX, mouseY);
         int background = focused() || hover ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_INPUT;
 
-        Render2D.roundedRect(context, x, y, width, height, 12f, background);
-        Render2D.border(context, x, y, width, height, 0.5f,
-                focused() ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                12f, background, 0.5f, focused() ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
 
         float textX = x + PADDING;
         if (icon != null) {

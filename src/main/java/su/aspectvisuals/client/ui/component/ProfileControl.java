@@ -62,9 +62,8 @@ public class ProfileControl extends Component {
         width = width();
         boolean hover = hovered(mouseX, mouseY);
 
-        Render2D.roundedRect(context, x, y, width, height, height / 2f,
-                hover || expanded ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                height / 2f, hover || expanded ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         drawAvatar(context, x + PADDING, y + (height - AVATAR) / 2f, AVATAR);
         AspectFont.MEDIUM.draw(context, label(), x + PADDING + AVATAR + GAP,
@@ -95,20 +94,20 @@ public class ProfileControl extends Component {
         float cardY = y + this.height + 8f;
 
         Render2D.shadow(context, x, cardY, CARD_WIDTH, height, 12f);
-        Render2D.roundedRect(context, x, cardY, CARD_WIDTH, height, 12f, AspectColors.SURFACE_CARD);
-        Render2D.border(context, x, cardY, CARD_WIDTH, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, cardY, CARD_WIDTH, height,
+                12f, AspectColors.SURFACE_CARD, 0.5f, AspectColors.SURFACE_BORDER);
 
         if (progress < 0.9f) {
             return;
         }
 
-        context.enableScissor(Math.round(x), Math.round(cardY), Math.round(x + CARD_WIDTH), Math.round(cardY + height));
+        Render2D.pushClip(context, x, cardY, CARD_WIDTH, height);
         switch (account.state()) {
             case SIGNED_IN -> drawAccount(context, cardY, mouseX, mouseY);
             case LINKING -> drawLinking(context, cardY);
             case SIGNED_OUT -> drawSignedOut(context, cardY, mouseX, mouseY);
         }
-        context.disableScissor();
+        Render2D.popClip(context);
     }
 
     private float cardHeight() {

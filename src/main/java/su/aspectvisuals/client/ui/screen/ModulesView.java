@@ -143,10 +143,8 @@ public class ModulesView implements ScreenView {
         if (mode == AspectScreen.Mode.PANEL) {
             float panelTop = categories.y() - 8f;
             float panelHeight = gridY + gridHeight - panelTop + PANEL_PADDING;
-            Render2D.roundedRect(context, gridX - PANEL_PADDING, panelTop, gridWidth + PANEL_PADDING * 2,
-                    panelHeight, 12f, AspectColors.SURFACE_MAIN_GLASS);
-            Render2D.border(context, gridX - PANEL_PADDING, panelTop, gridWidth + PANEL_PADDING * 2,
-                    panelHeight, 0.5f, AspectColors.SURFACE_BORDER);
+            Render2D.filledBorder(context, gridX - PANEL_PADDING, panelTop, gridWidth + PANEL_PADDING * 2, panelHeight,
+                    12f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
             Render2D.texture(context, Icons.LOGO, gridX, panelTop + 12f, 18f, AspectColors.ACCENT_PRIMARY);
         } else {
             Render2D.texture(context, Icons.LOGO, (gridX + gridWidth / 2f) - 14f, search.y() - 52f, 28f,
@@ -156,8 +154,7 @@ public class ModulesView implements ScreenView {
         search.draw(context, mouseX, mouseY, delta);
         categories.draw(context, mouseX, mouseY, delta);
 
-        context.enableScissor(Math.round(gridX), Math.round(gridY),
-                Math.round(gridX + gridWidth), Math.round(gridY + gridHeight));
+        Render2D.pushClip(context, gridX, gridY, gridWidth, gridHeight);
 
         for (int i = 0; i < shown.size(); i++) {
             float cardX = gridX + (i % columns) * (CARD_WIDTH + CARD_GAP);
@@ -168,7 +165,7 @@ public class ModulesView implements ScreenView {
             }
             drawCard(context, shown.get(i), toggles.get(i), cardX, cardY, mouseX, mouseY, delta);
         }
-        context.disableScissor();
+        Render2D.popClip(context);
 
         if (shown.isEmpty()) {
             AspectFont.MEDIUM.drawCentered(context, "Ничего не найдено", gridX + gridWidth / 2f,
@@ -188,9 +185,8 @@ public class ModulesView implements ScreenView {
         int background = hover
                 ? AspectColors.SURFACE_CARD_HOVER
                 : (active ? AspectColors.SURFACE_CARD : AspectColors.withAlpha(AspectColors.SURFACE_CARD, 0.75f));
-        Render2D.roundedRect(context, x, y, CARD_WIDTH, CARD_HEIGHT, 12f, background);
-        Render2D.border(context, x, y, CARD_WIDTH, CARD_HEIGHT, 0.5f,
-                active ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, CARD_WIDTH, CARD_HEIGHT,
+                12f, background, 0.5f, active ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
 
         AspectFont.SEMIBOLD.draw(context, module.name(), x + 16f, y + 16f,
                 active ? AspectColors.TEXT_PRIMARY : AspectColors.TEXT_SECONDARY);

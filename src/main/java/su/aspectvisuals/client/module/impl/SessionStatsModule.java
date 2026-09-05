@@ -58,8 +58,8 @@ public class SessionStatsModule extends HudModule {
         float width = widgetWidth();
         float height = widgetHeight();
 
-        Render2D.roundedRect(context, 0f, 0f, width, height, height / 2f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, 0f, 0f, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, 0f, 0f, width, height,
+                height / 2f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         float textY = (height - AspectFont.MEDIUM.lineHeight()) / 2f;
         float cursor = HudCard.PADDING;

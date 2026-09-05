@@ -24,10 +24,8 @@ public class KeybindPicker extends Component {
     @Override
     protected void render(DrawContext context, int mouseX, int mouseY, float delta) {
         boolean hover = hovered(mouseX, mouseY);
-        Render2D.roundedRect(context, x, y, width, height, 8f,
-                hover || listening ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_INPUT);
-        Render2D.border(context, x, y, width, height, 0.5f,
-                listening ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                8f, hover || listening ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_INPUT, 0.5f, listening ? AspectColors.SURFACE_BORDER_TYPE : AspectColors.SURFACE_BORDER);
 
         String label = listening ? "…" : setting.label();
         AspectFont.MEDIUM.drawCentered(context, label, x + width / 2f,

@@ -29,8 +29,8 @@ public class Toggle extends Component {
         float progress = slide.eased();
 
         int track = AspectColors.lerp(AspectColors.BOOLEAN_SOFT, AspectColors.BOOLEAN_PRIMARY, progress);
-        Render2D.roundedRect(context, x, y, width, height, height / 2f, track);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                height / 2f, track, 0.5f, AspectColors.SURFACE_BORDER);
 
         float travel = width - KNOB_WIDTH - PADDING * 2;
         float knobX = x + PADDING + travel * progress;

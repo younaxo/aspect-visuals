@@ -64,8 +64,8 @@ public class TabBar extends Component {
 
     @Override
     protected void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Render2D.roundedRect(context, x, y, width, height, height / 2f, AspectColors.SURFACE_INPUT);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                height / 2f, AspectColors.SURFACE_INPUT, 0.5f, AspectColors.SURFACE_BORDER);
 
         indicator.target(selected);
         float position = indicator.value();

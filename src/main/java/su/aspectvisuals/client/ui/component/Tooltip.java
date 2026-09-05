@@ -21,8 +21,8 @@ public final class Tooltip {
         float x = Math.min(mouseX + 12f, screenWidth - width - 4f);
         float y = mouseY - height - 6f;
 
-        Render2D.roundedRect(context, x, y, width, height, 8f, AspectColors.SURFACE_CARD);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                8f, AspectColors.SURFACE_CARD, 0.5f, AspectColors.SURFACE_BORDER);
         AspectFont.MEDIUM.draw(context, text, x + PADDING, y + PADDING / 2f, AspectColors.TEXT_SECONDARY);
     }
 }

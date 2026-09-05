@@ -54,8 +54,8 @@ public class WaypointsView implements ScreenView {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Render2D.roundedRect(context, x, y, WIDTH, height, 12f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, WIDTH, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, WIDTH, height,
+                12f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         List<Waypoint> waypoints = AspectVisuals.waypoints().all();
         if (waypoints.isEmpty()) {
@@ -63,7 +63,7 @@ public class WaypointsView implements ScreenView {
                     AspectColors.TEXT_TERTIARY);
         }
 
-        context.enableScissor(Math.round(x), Math.round(y), Math.round(x + WIDTH), Math.round(y + height));
+        Render2D.pushClip(context, x, y, WIDTH, height);
         for (int i = 0; i < waypoints.size(); i++) {
             Waypoint waypoint = waypoints.get(i);
             float rowY = y + PADDING + i * ROW_HEIGHT - scroll;
@@ -91,7 +91,7 @@ public class WaypointsView implements ScreenView {
                     Render2D.hovered(mouseX, mouseY, x + WIDTH - PADDING - 24f, rowY + 9f, 16f, 16f)
                             ? AspectColors.TEXT_PRIMARY : AspectColors.TEXT_TERTIARY);
         }
-        context.disableScissor();
+        Render2D.popClip(context);
 
         name.draw(context, mouseX, mouseY, delta);
         add.draw(context, mouseX, mouseY, delta);

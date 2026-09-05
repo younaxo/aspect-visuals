@@ -67,8 +67,8 @@ public class WatermarkModule extends HudModule {
 
     @Override
     public void renderWidget(DrawContext context) {
-        Render2D.roundedRect(context, 0f, 0f, MARK, MARK, MARK / 2f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, 0f, 0f, MARK, MARK, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, 0f, 0f, MARK, MARK,
+                MARK / 2f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
         Render2D.texture(context, Icons.LOGO, (MARK - 14f) / 2f, (MARK - 14f) / 2f, 14f, AspectColors.ACCENT_PRIMARY);
 
         if (!showProfile.get()) {
@@ -79,8 +79,8 @@ public class WatermarkModule extends HudModule {
         float width = pillWidth();
         float top = (MARK - PILL_HEIGHT) / 2f;
 
-        Render2D.roundedRect(context, pillX, top, width, PILL_HEIGHT, PILL_HEIGHT / 2f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, pillX, top, width, PILL_HEIGHT, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, pillX, top, width, PILL_HEIGHT,
+                PILL_HEIGHT / 2f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         drawAvatar(context, pillX + PADDING, top + (PILL_HEIGHT - AVATAR) / 2f);
 

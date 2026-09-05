@@ -53,8 +53,8 @@ public final class HudCard {
         float width = width(title, rows);
         float height = height(title, rows);
 
-        Render2D.roundedRect(context, x, y, width, height, RADIUS, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                RADIUS, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         float cursorY = y + PADDING;
         if (title != null) {
@@ -87,8 +87,8 @@ public final class HudCard {
         float width = pillWidth(icon, text);
         float height = pillHeight();
 
-        Render2D.roundedRect(context, x, y, width, height, height / 2f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                height / 2f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         float textX = x + PADDING;
         if (icon != null) {

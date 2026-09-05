@@ -30,8 +30,8 @@ public class PlaceholderView implements ScreenView {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        Render2D.roundedRect(context, x, y, WIDTH, HEIGHT, 12f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, WIDTH, HEIGHT, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, WIDTH, HEIGHT,
+                12f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         Render2D.texture(context, Icons.HANDSHAKE, x + WIDTH / 2f - 12f, y + 24f, 24f, AspectColors.TEXT_TERTIARY);
         AspectFont.SEMIBOLD.drawCentered(context, title, x + WIDTH / 2f, y + 58f, AspectColors.TEXT_PRIMARY);

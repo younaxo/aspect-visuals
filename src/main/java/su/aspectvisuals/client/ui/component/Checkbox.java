@@ -24,8 +24,8 @@ public class Checkbox extends Component {
         float progress = fade.eased();
 
         int background = AspectColors.lerp(AspectColors.SURFACE_INPUT, AspectColors.BOOLEAN_PRIMARY, progress);
-        Render2D.roundedRect(context, x, y, width, height, 6f, background);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                6f, background, 0.5f, AspectColors.SURFACE_BORDER);
 
         if (progress > 0.02f) {
             int tint = AspectColors.withAlpha(AspectColors.STRONG_BLACK, progress);

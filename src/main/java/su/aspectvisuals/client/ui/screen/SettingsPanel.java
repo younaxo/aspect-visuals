@@ -133,14 +133,13 @@ public class SettingsPanel {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         float height = height();
 
-        Render2D.roundedRect(context, x, y, WIDTH, height, 12f, AspectColors.SURFACE_MAIN_GLASS);
-        Render2D.border(context, x, y, WIDTH, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, WIDTH, height,
+                12f, AspectColors.SURFACE_MAIN_GLASS, 0.5f, AspectColors.SURFACE_BORDER);
 
         AspectFont.SEMIBOLD.draw(context, module.name(), x + PADDING, y + PADDING, AspectColors.TEXT_PRIMARY);
         Render2D.texture(context, Icons.SETTINGS, x + WIDTH - PADDING - 14f, y + PADDING, 14f, AspectColors.TEXT_TERTIARY);
 
-        context.enableScissor(Math.round(x), Math.round(y + PADDING + 22f),
-                Math.round(x + WIDTH), Math.round(y + height));
+        Render2D.pushClip(context, x, y + PADDING + 22f, WIDTH, height - PADDING - 22f);
 
         float cursorY = y + PADDING + 26f - scroll;
         for (Setting<?> setting : visible()) {
@@ -163,7 +162,7 @@ public class SettingsPanel {
             }
             cursorY += rowHeight;
         }
-        context.disableScissor();
+        Render2D.popClip(context);
     }
 
     private static String format(double value) {

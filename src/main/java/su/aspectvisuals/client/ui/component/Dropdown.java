@@ -35,9 +35,8 @@ public class Dropdown extends Component {
     @Override
     protected void render(DrawContext context, int mouseX, int mouseY, float delta) {
         boolean hover = hovered(mouseX, mouseY);
-        Render2D.roundedRect(context, x, y, width, height, 8f,
-                hover ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_INPUT);
-        Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, y, width, height,
+                8f, hover ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_INPUT, 0.5f, AspectColors.SURFACE_BORDER);
 
         float textY = y + (height - AspectFont.MEDIUM.lineHeight()) / 2f;
         AspectFont.MEDIUM.draw(context, setting.get(), x + PADDING, textY, AspectColors.TEXT_PRIMARY);
@@ -56,10 +55,10 @@ public class Dropdown extends Component {
         float listHeight = options.size() * ROW_HEIGHT * progress;
         float listY = y + height + 4f;
 
-        Render2D.roundedRect(context, x, listY, width, listHeight, 8f, AspectColors.SURFACE_CARD);
-        Render2D.border(context, x, listY, width, listHeight, 0.5f, AspectColors.SURFACE_BORDER);
+        Render2D.filledBorder(context, x, listY, width, listHeight,
+                8f, AspectColors.SURFACE_CARD, 0.5f, AspectColors.SURFACE_BORDER);
 
-        context.enableScissor(Math.round(x), Math.round(listY), Math.round(x + width), Math.round(listY + listHeight));
+        Render2D.pushClip(context, x, listY, width, listHeight);
         for (int i = 0; i < options.size(); i++) {
             String option = options.get(i);
             float rowY = listY + i * ROW_HEIGHT;
@@ -76,7 +75,7 @@ public class Dropdown extends Component {
                 Render2D.texture(context, Icons.CHECK, x + width - PADDING - 10f, rowY + (ROW_HEIGHT - 10f) / 2f, 10f, AspectColors.TEXT_PRIMARY);
             }
         }
-        context.disableScissor();
+        Render2D.popClip(context);
     }
 
     @Override

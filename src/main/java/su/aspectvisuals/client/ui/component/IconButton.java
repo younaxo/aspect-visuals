@@ -26,8 +26,8 @@ public class IconButton extends Component {
 
         if (filled) {
             int background = hover ? AspectColors.SURFACE_CARD_HOVER : AspectColors.SURFACE_CARD;
-            Render2D.roundedRect(context, x, y, width, height, width / 2f, background);
-            Render2D.border(context, x, y, width, height, 0.5f, AspectColors.SURFACE_BORDER);
+            Render2D.filledBorder(context, x, y, width, height,
+                    width / 2f, background, 0.5f, AspectColors.SURFACE_BORDER);
         }
 
         int tint = enabled()
