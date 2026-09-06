@@ -88,7 +88,11 @@ public enum AspectFont {
     }
 
     public void drawRight(DrawContext context, String text, float rightX, float y, int color) {
-        draw(context, text, rightX - width(text), y, color);
+        drawRight(context, text, rightX, y, SIZE, color);
+    }
+
+    public void drawRight(DrawContext context, String text, float rightX, float y, float size, int color) {
+        draw(context, text, rightX - width(text, size), y, size, color);
     }
 
     /** Обрезает строку по ширине и дописывает многоточие. */
