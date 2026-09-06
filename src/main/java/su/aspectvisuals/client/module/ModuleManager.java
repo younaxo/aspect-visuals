@@ -9,6 +9,7 @@ import su.aspectvisuals.client.module.impl.CrosshairModule;
 import su.aspectvisuals.client.module.impl.DirectionModule;
 import su.aspectvisuals.client.module.impl.FpsCounterModule;
 import su.aspectvisuals.client.module.impl.FullbrightModule;
+import su.aspectvisuals.client.module.impl.MusicBarModule;
 import su.aspectvisuals.client.module.impl.TargetHudModule;
 import su.aspectvisuals.client.module.impl.TotemCounterModule;
 import su.aspectvisuals.client.module.impl.ItemStatusModule;
@@ -42,6 +43,7 @@ public final class ModuleManager {
         add(new WorldInfoModule());
 
         add(new CrosshairModule());
+        add(new MusicBarModule());
         add(new TargetHudModule());
         add(new TotemCounterModule());
         add(new FullbrightModule());
