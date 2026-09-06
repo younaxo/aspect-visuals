@@ -47,6 +47,26 @@ jobs:
       - name: Build
         run: ./gradlew build --stacktrace
 
+      # Временный шаг: подтверждает API чата перед написанием миксина.
+      # Удаляется, как только чат реализован.
+      - name: Разведка чата
+        if: always()
+        run: |
+          set +e
+          NAMED=""
+          for J in $(find ~/.gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
+            if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/gui/hud/ChatHud.class"; then NAMED="$J"; break; fi
+          done
+          echo "== ChatHud"
+          javap -p -cp "$NAMED" net.minecraft.client.gui.hud.ChatHud 2>&1 | grep -iE "render|visible|messages|getWidth|getHeight|addMessage|scroll" | head -20
+          echo "== ChatHudLine"
+          javap -p -cp "$NAMED" net.minecraft.client.gui.hud.ChatHudLine 2>&1 | head -12
+          echo "== MinecraftClient: доступ к чату"
+          javap -cp "$NAMED" net.minecraft.client.MinecraftClient 2>&1 | grep -iE "ChatHud|inGameHud" | head -5
+          echo "== InGameHud"
+          javap -p -cp "$NAMED" net.minecraft.client.gui.hud.InGameHud 2>&1 | grep -iE "getChatHud|chatHud" | head -5
+          exit 0
+
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
