@@ -11,7 +11,7 @@
     "issues": "https://github.com/younaxo/aspect-visuals/issues"
   },
   "license": "ARR",
-  "icon": "assets/aspectvisuals/icons/logo.png",
+  "icon": "assets/aspectvisuals/textures/logo.png",
   "environment": "client",
   "entrypoints": {
     "client": ["su.aspectvisuals.client.AspectVisuals"]
