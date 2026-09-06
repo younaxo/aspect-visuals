@@ -86,7 +86,10 @@ public final class AspectVisuals implements ClientModInitializer {
         // мода вызывается изнутри конструктора MinecraftClient, где options
         // ещё не создан, и включение модуля, который читает настройки игры,
         // роняло запуск.
-        ClientLifecycleEvents.CLIENT_STARTED.register(client -> config.load());
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            config.load();
+            su.aspectvisuals.client.ui.WindowBranding.applyIcon();
+        });
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             config.save();

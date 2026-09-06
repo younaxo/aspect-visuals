@@ -47,24 +47,6 @@ jobs:
       - name: Build
         run: ./gradlew build --stacktrace
 
-      # Временный шаг: подтверждает API окна перед заменой значка и заголовка.
-      - name: Разведка окна
-        if: always()
-        run: |
-          set +e
-          NAMED=""
-          for J in $(find ~/.gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
-            if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/util/Window.class"; then NAMED="$J"; break; fi
-          done
-          echo "== Window: заголовок и значок"
-          javap -p -cp "$NAMED" net.minecraft.client.util.Window 2>&1 | grep -iE "title|icon" | head -10
-          echo "== MinecraftClient: заголовок"
-          javap -p -cp "$NAMED" net.minecraft.client.MinecraftClient 2>&1 | grep -iE "WindowTitle|windowTitle" | head -10
-          echo "== IconProvider/значки"
-          javap -p -cp "$NAMED" net.minecraft.client.util.Icons 2>&1 | head -8
-          unzip -l "$NAMED" 2>/dev/null | grep -oE "net/minecraft/client/util/[A-Za-z]*Icon[A-Za-z]*\.class" | sort -u | head -8
-          exit 0
-
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
