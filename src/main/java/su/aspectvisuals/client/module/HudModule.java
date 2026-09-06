@@ -59,6 +59,16 @@ public abstract class HudModule extends Module {
     /** Отрисовка виджета в собственных координатах: (0, 0) — левый верхний угол. */
     public abstract void renderWidget(DrawContext context);
 
+    /**
+     * Есть ли что показывать прямо сейчас.
+     *
+     * Включённый виджет не обязан быть виден: карточка цели без цели заняла
+     * бы место пустой. В редакторе HUD это не действует, там важно положение.
+     */
+    public boolean hasContent() {
+        return true;
+    }
+
     /** Данные-заглушка для редактора HUD, когда в мире виджету нечего показать. */
     public boolean drawInEditor() {
         return true;

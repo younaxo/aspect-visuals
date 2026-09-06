@@ -44,7 +44,7 @@ public final class HudManager {
     public List<HudModule> visibleWidgets() {
         List<HudModule> visible = new ArrayList<>();
         for (HudModule widget : widgets()) {
-            if (widget.enabled()) {
+            if (widget.enabled() && widget.hasContent()) {
                 visible.add(widget);
             }
         }

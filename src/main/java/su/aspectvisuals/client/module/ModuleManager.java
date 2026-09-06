@@ -9,6 +9,8 @@ import su.aspectvisuals.client.module.impl.CrosshairModule;
 import su.aspectvisuals.client.module.impl.DirectionModule;
 import su.aspectvisuals.client.module.impl.FpsCounterModule;
 import su.aspectvisuals.client.module.impl.FullbrightModule;
+import su.aspectvisuals.client.module.impl.TargetHudModule;
+import su.aspectvisuals.client.module.impl.TotemCounterModule;
 import su.aspectvisuals.client.module.impl.ItemStatusModule;
 import su.aspectvisuals.client.module.impl.KeystrokesModule;
 import su.aspectvisuals.client.module.impl.PotionEffectsModule;
@@ -40,6 +42,8 @@ public final class ModuleManager {
         add(new WorldInfoModule());
 
         add(new CrosshairModule());
+        add(new TargetHudModule());
+        add(new TotemCounterModule());
         add(new FullbrightModule());
     }
 
