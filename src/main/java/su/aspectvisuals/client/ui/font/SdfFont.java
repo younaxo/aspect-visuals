@@ -160,6 +160,7 @@ public final class SdfFont {
         AspectShaders.setVec2(program, "AspectTextParams", spread * size, 0f);
         float[] clip = UiClip.current();
         AspectShaders.setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
+        AspectShaders.setScreen(program);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();

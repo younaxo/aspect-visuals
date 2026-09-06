@@ -1,11 +1,4 @@
 {
-  "blend": {
-    "func": "add",
-    "srcrgb": "srcalpha",
-    "dstrgb": "1-srcalpha",
-    "srcalpha": "one",
-    "dstalpha": "1-srcalpha"
-  },
   "vertex": "aspectvisuals:core/aspect_shape",
   "fragment": "aspectvisuals:core/aspect_shape",
   "samplers": [],
@@ -17,6 +10,7 @@
     { "name": "AspectBorderColor", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
     { "name": "AspectGradient", "type": "float", "count": 4, "values": [1.0, 1.0, 1.0, 1.0] },
     { "name": "AspectClip", "type": "float", "count": 4, "values": [0.0, 0.0, 0.0, 0.0] },
+    { "name": "AspectScreen", "type": "float", "count": 2, "values": [1.0, 1.0] },
     { "name": "AspectParams", "type": "float", "count": 2, "values": [0.0, 0.0] }
   ]
 }

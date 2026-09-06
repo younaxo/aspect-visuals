@@ -7,6 +7,7 @@ import net.minecraft.client.gl.ShaderLoader;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gl.ShaderProgramKey;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.Window;
 import su.aspectvisuals.client.AspectVisuals;
 
 import java.util.HashSet;
@@ -63,6 +64,18 @@ public final class AspectShaders {
         if (uniform != null) {
             uniform.set(x, y);
         }
+    }
+
+    /**
+     * Размер буфера кадра. Шейдеры считают положение по gl_FragCoord, а не по
+     * вершине: вершина приходит уже умноженной на матрицу интерфейса, её
+     * единицы зависят от GUI Scale и от сдвигов в стеке матриц, тогда как
+     * фигура и область обрезки заданы в пикселях буфера. Высота нужна, чтобы
+     * перевернуть ось: у gl_FragCoord начало внизу, у интерфейса — вверху.
+     */
+    public static void setScreen(ShaderProgram program) {
+        Window window = MinecraftClient.getInstance().getWindow();
+        setVec2(program, "AspectScreen", window.getFramebufferWidth(), window.getFramebufferHeight());
     }
 
     /** Цвет ARGB раскладывается в нормированный RGBA. */

@@ -59,6 +59,7 @@ public final class ShapeRenderer {
 
         float[] clip = UiClip.current();
         AspectShaders.setVec4(program, "AspectClip", clip[0], clip[1], clip[2], clip[3]);
+        AspectShaders.setScreen(program);
 
         float pad = PADDING + border + softness * 3f;
         float left = x - pad;
