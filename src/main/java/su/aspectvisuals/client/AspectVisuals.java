@@ -19,6 +19,8 @@ import su.aspectvisuals.client.waypoint.WaypointStore;
 public final class AspectVisuals implements ClientModInitializer {
     public static final String MOD_ID = "aspectvisuals";
     public static final String NAME = "Aspect Visuals";
+    /** Имя без пробела: так клиент подписан в метаданных мода. */
+    public static final String MOD_NAME = "AspectVisuals";
     public static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
     private static ModuleManager modules;
@@ -29,6 +31,25 @@ public final class AspectVisuals implements ClientModInitializer {
 
     public static Identifier id(String path) {
         return Identifier.of(MOD_ID, path);
+    }
+
+    /**
+     * Загружены ли рядом посторонние моды.
+     *
+     * Загрузчик, его встроенные записи и Fabric API своими не считаются:
+     * API — зависимость клиента, а не чужая модификация.
+     */
+    public static boolean hasForeignMods() {
+        return FabricLoader.getInstance().getAllMods().stream()
+                .map(container -> container.getMetadata().getId())
+                .anyMatch(id -> !id.equals(MOD_ID)
+                        && !id.equals("minecraft")
+                        && !id.equals("java")
+                        && !id.equals("fabricloader")
+                        && !id.equals("mixinextras")
+                        && !id.startsWith("fabric-")
+                        && !id.equals("fabric-api")
+                        && !id.equals("fabric"));
     }
 
     public static String version() {
