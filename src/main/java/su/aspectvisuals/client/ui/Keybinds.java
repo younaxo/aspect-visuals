@@ -30,6 +30,14 @@ public final class Keybinds {
                 "key.categories.aspectvisuals"));
     }
 
+    public static KeyBinding openGui() {
+        return openGui;
+    }
+
+    public static KeyBinding hudEditor() {
+        return hudEditor;
+    }
+
     public static void tick(MinecraftClient client) {
         while (openGui.wasPressed()) {
             client.setScreen(new AspectScreen());

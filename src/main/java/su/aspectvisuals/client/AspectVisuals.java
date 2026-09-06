@@ -60,6 +60,7 @@ public final class AspectVisuals implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        Keybinds.register();
         modules = new ModuleManager();
         hud = new HudManager(modules);
         config = new ConfigManager(modules);
@@ -70,7 +71,6 @@ public final class AspectVisuals implements ClientModInitializer {
         waypoints.load();
         account.load();
 
-        Keybinds.register();
         su.aspectvisuals.client.hud.ChatHudDrag.register(hud);
         UiTextures.register();
 
