@@ -114,3 +114,9 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 Логотип `src/main/resources/assets/aspectvisuals/textures/logo.png` —
 фирменный знак проекта, тот же файл используется на сайте.
+
+## Значок приложения
+
+`assets/aspectvisuals/textures/app_icon.png` — иконка лаунчера Aspect Visuals
+из репозитория сайта (`launcher/icon.png`). Взята без изменений, чтобы окно
+игры и лаунчер выглядели одинаково в панели задач.

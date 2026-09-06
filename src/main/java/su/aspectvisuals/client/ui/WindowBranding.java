@@ -23,7 +23,12 @@ import java.nio.ByteBuffer;
  * изображением не заменяется.
  */
 public final class WindowBranding {
-    private static final String LOGO = "/assets/aspectvisuals/textures/logo.png";
+    /**
+     * Значок приложения, а не знак для интерфейса: у него собственная
+     * подложка. Знак из logo.png белый на прозрачном фоне — он рассчитан на
+     * тёмные панели клиента и на светлой панели задач был бы не виден.
+     */
+    private static final String ICON = "/assets/aspectvisuals/textures/app_icon.png";
 
     private WindowBranding() {
     }
@@ -73,9 +78,9 @@ public final class WindowBranding {
     }
 
     private static BufferedImage read() {
-        try (InputStream stream = WindowBranding.class.getResourceAsStream(LOGO)) {
+        try (InputStream stream = WindowBranding.class.getResourceAsStream(ICON)) {
             if (stream == null) {
-                AspectVisuals.LOGGER.warn("Значок окна не найден: {}", LOGO);
+                AspectVisuals.LOGGER.warn("Значок окна не найден: {}", ICON);
                 return null;
             }
             return ImageIO.read(stream);
