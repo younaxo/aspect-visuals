@@ -39,4 +39,10 @@ public final class Icons {
     public static final Identifier CONFIGS = icon("configs");
     public static final Identifier COPY = icon("copy");
     public static final Identifier SEND = icon("send");
+
+    // Флаги языков лежат отдельным набором макета: они цветные, поэтому
+    // рисуются без подкраски, в отличие от одноцветных иконок
+    public static final Identifier FLAG_EN = icon("flag_lang_en");
+    public static final Identifier FLAG_RU = icon("flag_lang_ru");
+    public static final Identifier FLAG_UA = icon("flag_ua");
 }
