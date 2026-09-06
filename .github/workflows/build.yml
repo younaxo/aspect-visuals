@@ -47,20 +47,6 @@ jobs:
       - name: Build
         run: ./gradlew build --stacktrace
 
-      # Временный шаг: подтверждает имя метода, в который целится миксин
-      # отладочного экрана. Удаляется после проверки.
-      - name: Разведка DebugHud
-        if: always()
-        run: |
-          set +e
-          NAMED=""
-          for J in $(find ~/.gradle /home/runner/work -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
-            if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/gui/hud/DebugHud.class"; then NAMED="$J"; break; fi
-          done
-          echo "== named jar: $NAMED"
-          javap -p -cp "$NAMED" net.minecraft.client.gui.hud.DebugHud 2>&1 | grep -iE "List|Text" | head -20
-          exit 0
-
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:
