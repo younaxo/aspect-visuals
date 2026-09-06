@@ -58,10 +58,17 @@ public abstract class Module {
             return;
         }
         enabled = value;
-        if (value) {
-            onEnable();
-        } else {
-            onDisable();
+        try {
+            if (value) {
+                onEnable();
+            } else {
+                onDisable();
+            }
+        } catch (RuntimeException error) {
+            // Иначе модуль числится включённым, не выполнив onEnable, и
+            // каждый тик падает на том же месте
+            enabled = !value;
+            throw error;
         }
     }
 

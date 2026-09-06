@@ -29,6 +29,9 @@ public final class ConfigManager {
     private final ModuleManager modules;
     private final Path path;
 
+    /** Пока конфиг не прочитан, сохранять нечего: иначе запишем состояние по умолчанию. */
+    private boolean loaded;
+
     public ConfigManager(ModuleManager modules) {
         this.modules = modules;
         this.path = JsonStore.directory().resolve(FILE);
@@ -36,6 +39,7 @@ public final class ConfigManager {
 
     public void load() {
         JsonObject root = JsonStore.read(path);
+        loaded = true;
         if (root == null) {
             return;
         }
@@ -55,7 +59,7 @@ public final class ConfigManager {
                 continue;
             }
 
-            module.setEnabled(JsonStore.booleanValue(stored, "enabled", false));
+            enableSafely(module, JsonStore.booleanValue(stored, "enabled", false));
             module.keybind().fromJson(stored.get("keybind"));
 
             JsonObject settings = object(stored, "settings");
@@ -73,6 +77,19 @@ public final class ConfigManager {
     }
 
     /** Одна испорченная настройка не должна отменять загрузку всего конфига. */
+    /**
+     * Модуль включается отдельно от остального конфига: он выполняет свой код,
+     * и его поломка не должна ни отменять загрузку, ни мешать запуску игры.
+     */
+    private void enableSafely(Module module, boolean enabled) {
+        try {
+            module.setEnabled(enabled);
+        } catch (RuntimeException error) {
+            AspectVisuals.LOGGER.error("Модуль {} не удалось включить, он останется выключенным: {}",
+                    module.name(), error.toString());
+        }
+    }
+
     private void applySafely(Module module, Setting<?> setting, JsonElement value) {
         try {
             setting.fromJson(value);
@@ -83,6 +100,12 @@ public final class ConfigManager {
     }
 
     public void save() {
+        if (!loaded) {
+            // Клиент не дожил до применения конфига — сохранение затёрло бы
+            // настройки пользователя состоянием по умолчанию
+            AspectVisuals.LOGGER.warn("Конфигурация не сохранена: она не была загружена");
+            return;
+        }
         JsonStore.write(path, snapshot());
     }
 

@@ -45,7 +45,7 @@ public final class AspectVisuals implements ClientModInitializer {
         account = new AccountManager(version());
         waypoints = new WaypointStore();
 
-        config.load();
+        // Точки и сессия — это чтение файлов, игру они не трогают
         waypoints.load();
         account.load();
 
@@ -59,6 +59,12 @@ public final class AspectVisuals implements ClientModInitializer {
         });
 
         HudRenderCallback.EVENT.register((context, tickCounter) -> hud.render(context));
+
+        // Конфигурация применяется только после старта клиента. Точка входа
+        // мода вызывается изнутри конструктора MinecraftClient, где options
+        // ещё не создан, и включение модуля, который читает настройки игры,
+        // роняло запуск.
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> config.load());
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             config.save();
