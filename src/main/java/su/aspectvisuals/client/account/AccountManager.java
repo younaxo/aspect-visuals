@@ -108,7 +108,9 @@ public final class AccountManager {
         json.addProperty("token", session.token());
         json.addProperty("sessionId", session.sessionId());
         json.addProperty("expiresAt", session.expiresAt());
-        JsonStore.write(sessionPath, json);
+        // Токен сессии не копируется: общесистемная папка читается всеми
+        // учётными записями машины, и копия сделала бы вход доступным им
+        JsonStore.write(sessionPath, json, false);
     }
 
     /** Шаг входа: запрашиваем одноразовый код и открываем страницу подтверждения. */

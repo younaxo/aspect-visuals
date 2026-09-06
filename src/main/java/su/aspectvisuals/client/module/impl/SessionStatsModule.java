@@ -29,7 +29,7 @@ public class SessionStatsModule extends HudModule {
     private static final float DIVIDER = 0.5f;
 
     public SessionStatsModule() {
-        super("Session Stats", "Статистика сессии", Category.HUD, 0.5f, 0.03f, HudAnchor.TOP_LEFT);
+        super("Dynamic Island", "Ник, FPS, пинг и TPS", Category.HUD, 0.5f, 0.03f, HudAnchor.TOP_LEFT);
     }
 
     private String playerName() {

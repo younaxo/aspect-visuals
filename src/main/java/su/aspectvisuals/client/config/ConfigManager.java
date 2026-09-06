@@ -56,6 +56,9 @@ public final class ConfigManager {
         for (Module module : modules.all()) {
             JsonObject stored = object(moduleStates, module.name());
             if (stored == null) {
+                stored = object(moduleStates, renamed(module.name()));
+            }
+            if (stored == null) {
                 continue;
             }
 
@@ -77,6 +80,18 @@ public final class ConfigManager {
     }
 
     /** Одна испорченная настройка не должна отменять загрузку всего конфига. */
+    /**
+     * Прежнее имя модуля в конфиге.
+     *
+     * Модуль переименован под макет, но сохранённые позиция и настройки
+     * записаны под старым именем: без переноса игрок потерял бы раскладку.
+     */
+    private static String renamed(String name) {
+        return "Dynamic Island".equals(name) ? "Session Stats"
+                : "Keybinds".equals(name) ? "Keystrokes"
+                : null;
+    }
+
     /**
      * Модуль включается отдельно от остального конфига: он выполняет свой код,
      * и его поломка не должна ни отменять загрузку, ни мешать запуску игры.
@@ -184,7 +199,8 @@ public final class ConfigManager {
     }
 
     private static JsonObject object(JsonObject parent, String key) {
-        if (parent.has(key) && parent.get(key).isJsonObject()) {
+        // Ключ может отсутствовать: переименованного модуля раньше не было
+        if (key != null && parent.has(key) && parent.get(key).isJsonObject()) {
             return parent.getAsJsonObject(key);
         }
         return null;

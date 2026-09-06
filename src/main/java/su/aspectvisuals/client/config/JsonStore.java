@@ -29,13 +29,7 @@ public final class JsonStore {
     }
 
     public static Path directory() {
-        Path directory = FabricLoader.getInstance().getConfigDir().resolve(AspectVisuals.MOD_ID);
-        try {
-            Files.createDirectories(directory);
-        } catch (IOException error) {
-            AspectVisuals.LOGGER.error("Не удалось создать папку конфигурации: {}", error.getMessage());
-        }
-        return directory;
+        return StorageRoots.primary();
     }
 
     public static JsonObject read(Path path) {
@@ -54,12 +48,38 @@ public final class JsonStore {
     }
 
     public static void write(Path path, JsonObject json) {
+        write(path, json, true);
+    }
+
+    /**
+     * @param mirror копировать ли файл в дополнительные папки; для секретов
+     *               выключено: они остаются только в пользовательской папке
+     */
+    public static void write(Path path, JsonObject json, boolean mirror) {
+        String text = GSON.toJson(json);
+        if (!writeTo(path, text)) {
+            return;
+        }
+        if (!mirror) {
+            return;
+        }
+        for (Path root : StorageRoots.mirrors()) {
+            Path prepared = StorageRoots.prepare(root);
+            if (prepared != null) {
+                writeTo(prepared.resolve(path.getFileName().toString()), text);
+            }
+        }
+    }
+
+    private static boolean writeTo(Path path, String text) {
         Path temporary = path.resolveSibling(path.getFileName() + ".tmp");
         try {
-            Files.writeString(temporary, GSON.toJson(json), StandardCharsets.UTF_8);
+            Files.writeString(temporary, text, StandardCharsets.UTF_8);
             Files.move(temporary, path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            return true;
         } catch (IOException error) {
-            AspectVisuals.LOGGER.error("Не удалось сохранить {}: {}", path.getFileName(), error.getMessage());
+            AspectVisuals.LOGGER.error("Не удалось сохранить {}: {}", path, error.getMessage());
+            return false;
         }
     }
 
