@@ -15,14 +15,12 @@ import su.aspectvisuals.client.ui.theme.AspectColors;
  * Позиции сохраняются долями экрана, поэтому не ломаются при смене разрешения.
  */
 public class HudEditorScreen extends Screen {
-    private static final float SNAP = 6f;
 
     private final Screen parent;
     private final HudManager hud;
 
-    private HudModule dragged;
-    private float grabX;
-    private float grabY;
+    private final su.aspectvisuals.client.hud.HudDragger dragger =
+            new su.aspectvisuals.client.hud.HudDragger(su.aspectvisuals.client.AspectVisuals.hud());
 
     public HudEditorScreen(Screen parent) {
         super(Text.literal("Редактор HUD"));
@@ -54,7 +52,7 @@ public class HudEditorScreen extends Screen {
 
             boolean hover = Render2D.hovered(mouseX, mouseY, x, y, w, h);
             int outline = widget.enabled()
-                    ? (hover || widget == dragged ? AspectColors.ACCENT_PRIMARY : AspectColors.SURFACE_BORDER_TYPE)
+                    ? (hover || widget == dragger.dragged() ? AspectColors.ACCENT_PRIMARY : AspectColors.SURFACE_BORDER_TYPE)
                     : AspectColors.SURFACE_BORDER;
             Render2D.border(context, x - 2f, y - 2f, w + 4f, h + 4f, 1f, outline);
 
@@ -69,7 +67,7 @@ public class HudEditorScreen extends Screen {
     }
 
     private void drawGuides(DrawContext context) {
-        if (dragged == null) {
+        if (dragger.dragged() == null) {
             return;
         }
         Render2D.rect(context, width / 2f, 0f, 1f, height, AspectColors.ACCENT_GLOW);
@@ -78,84 +76,33 @@ public class HudEditorScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for (HudModule widget : hud.widgets()) {
-            float x = hud.resolveX(widget, width);
-            float y = hud.resolveY(widget, height);
-            float w = widget.widgetWidth() * widget.scale();
-            float h = widget.widgetHeight() * widget.scale();
-
-            if (!Render2D.hovered(mouseX, mouseY, x, y, w, h)) {
-                continue;
-            }
-
-            if (button == 1) {
-                widget.toggle();
-                return true;
-            }
-            dragged = widget;
-            grabX = (float) mouseX - x;
-            grabY = (float) mouseY - y;
+        HudModule widget = dragger.at(mouseX, mouseY, width, height);
+        if (widget == null) {
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+        if (button == 1) {
+            widget.toggle();
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return dragger.press(mouseX, mouseY, width, height);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (dragged == null) {
-            return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-        }
-
-        float w = dragged.widgetWidth() * dragged.scale();
-        float h = dragged.widgetHeight() * dragged.scale();
-
-        float x = snap((float) mouseX - grabX, w, width);
-        float y = snap((float) mouseY - grabY, h, height);
-
-        // Точка привязки зависит от угла: правые виджеты держатся за правый край
-        float anchorX = dragged.anchor().right() ? x + w : x;
-        float anchorY = dragged.anchor().bottom() ? y + h : y;
-        dragged.moveTo(anchorX / width, anchorY / height);
-        return true;
-    }
-
-    private float snap(float value, float size, float screen) {
-        float[] targets = {0f, (screen - size) / 2f, screen - size};
-        for (float target : targets) {
-            if (Math.abs(value - target) < SNAP) {
-                return target;
-            }
-        }
-        return Math.max(0f, Math.min(value, screen - size));
+        return dragger.move(mouseX, mouseY, width, height)
+                || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        dragged = null;
+        dragger.release();
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double vertical) {
-        for (HudModule widget : hud.widgets()) {
-            float x = hud.resolveX(widget, width);
-            float y = hud.resolveY(widget, height);
-            float w = widget.widgetWidth() * widget.scale();
-            float h = widget.widgetHeight() * widget.scale();
-
-            if (Render2D.hovered(mouseX, mouseY, x, y, w, h)) {
-                widget.settings().stream()
-                        .filter(setting -> setting.name().equals("Масштаб"))
-                        .findFirst()
-                        .ifPresent(setting -> {
-                            if (setting instanceof su.aspectvisuals.client.setting.NumberSetting scale) {
-                                scale.set(scale.get() + vertical * 0.05);
-                            }
-                        });
-                return true;
-            }
-        }
-        return super.mouseScrolled(mouseX, mouseY, horizontal, vertical);
+        return dragger.resize(mouseX, mouseY, vertical, width, height)
+                || super.mouseScrolled(mouseX, mouseY, horizontal, vertical);
     }
 
     @Override

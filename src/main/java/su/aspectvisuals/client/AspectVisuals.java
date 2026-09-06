@@ -71,6 +71,7 @@ public final class AspectVisuals implements ClientModInitializer {
         account.load();
 
         Keybinds.register();
+        su.aspectvisuals.client.hud.ChatHudDrag.register(hud);
         UiTextures.register();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

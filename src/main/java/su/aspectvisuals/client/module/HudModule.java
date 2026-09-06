@@ -39,6 +39,10 @@ public abstract class HudModule extends Module {
         return posY;
     }
 
+    public void setScale(float value) {
+        scale.set((double) value);
+    }
+
     public float scale() {
         return scale.asFloat();
     }
