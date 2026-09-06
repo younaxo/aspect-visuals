@@ -3,6 +3,7 @@ package su.aspectvisuals.client.ui.render;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
+import org.joml.Matrix4f;
 import su.aspectvisuals.client.ui.theme.AspectColors;
 import su.aspectvisuals.client.ui.theme.AspectSizes;
 
@@ -166,16 +167,27 @@ public final class Render2D {
     /** Обрезка задаётся в координатах раскладки, применяется в физических. */
     public static void pushClip(DrawContext context, float x, float y, float width, float height) {
         context.draw();
+
+        // Область принадлежит экрану, а не месту вызова: координаты проводятся
+        // через текущую матрицу, иначе обрезка внутри сдвинутого виджета
+        // отрезала бы не там. Стек интерфейса содержит только перенос и
+        // масштаб, поэтому достаточно диагонали и переноса.
+        Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
+        float left = x * matrix.m00() + matrix.m30();
+        float top = y * matrix.m11() + matrix.m31();
+        float right = (x + width) * matrix.m00() + matrix.m30();
+        float bottom = (y + height) * matrix.m11() + matrix.m31();
+
         float scale = UiScale.factor();
-        UiClip.push(x * scale, y * scale, width * scale, height * scale);
+        UiClip.push(left * scale, top * scale, (right - left) * scale, (bottom - top) * scale);
 
         // Ножницы оставляем как грубое отсечение: расширяем наружу, чтобы они
         // не срезали сглаживание, точную границу задаёт шейдер
         context.enableScissor(
-                (int) Math.floor(x),
-                (int) Math.floor(y),
-                (int) Math.ceil(x + width),
-                (int) Math.ceil(y + height));
+                (int) Math.floor(left),
+                (int) Math.floor(top),
+                (int) Math.ceil(right),
+                (int) Math.ceil(bottom));
     }
 
     public static void popClip(DrawContext context) {

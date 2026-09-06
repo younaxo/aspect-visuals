@@ -26,7 +26,7 @@ import java.util.Set;
 public final class AspectShaders {
     private static final ShaderProgramKey SHAPE = new ShaderProgramKey(
             AspectVisuals.id("core/aspect_shape"),
-            VertexFormats.POSITION_COLOR,
+            VertexFormats.POSITION_TEXTURE_COLOR,
             Defines.EMPTY);
 
     private static final ShaderProgramKey TEXT = new ShaderProgramKey(

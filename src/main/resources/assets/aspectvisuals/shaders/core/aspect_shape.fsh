@@ -1,6 +1,7 @@
 #version 150
 
 in vec4 vertexColor;
+in vec2 localPos;
 
 uniform vec4 AspectRect;
 uniform vec4 AspectRadius;
@@ -26,14 +27,10 @@ float roundedBoxSdf(vec2 point, vec2 halfSize, vec4 radius) {
 }
 
 void main() {
-    // Позиция считается по буферу, а не по вершине: вершина доходит сюда уже
-    // умноженной на матрицу интерфейса, и её единицы зависят от GUI Scale и
-    // от сдвигов в стеке матриц. gl_FragCoord всегда в пикселях буфера —
-    // ровно в тех же, в которых заданы фигура и область обрезки.
-    vec2 pixel = vec2(gl_FragCoord.x, AspectScreen.y - gl_FragCoord.y);
-
+    // Фигура считается в своей системе координат, которую принёс атрибут:
+    // она не зависит ни от GUI Scale, ни от сдвига и масштаба виджета
     vec2 halfSize = AspectRect.zw * 0.5;
-    vec2 point = pixel - (AspectRect.xy + halfSize);
+    vec2 point = localPos - (AspectRect.xy + halfSize);
     float dist = roundedBoxSdf(point, halfSize, AspectRadius);
 
     // Ширина сглаживания берётся из производной, поэтому она равна одному
@@ -43,7 +40,7 @@ void main() {
     float border = AspectParams.x;
     float softness = AspectParams.y;
 
-    float gradientT = clamp((pixel.y - AspectRect.y) / max(AspectRect.w, 0.0001), 0.0, 1.0);
+    float gradientT = clamp((localPos.y - AspectRect.y) / max(AspectRect.w, 0.0001), 0.0, 1.0);
     vec4 base = mix(vertexColor, AspectGradient, gradientT);
 
     vec4 result;
@@ -70,6 +67,9 @@ void main() {
     // Обрезка тоже аналитическая: ножницы OpenGL режут по целым логическим
     // пикселям и съедают сглаживание по краю области
     if (AspectClip.z > 0.0 && AspectClip.w > 0.0) {
+        // Обрезка задаётся в пикселях буфера: область принадлежит экрану,
+        // а не фигуре, поэтому берётся из gl_FragCoord
+        vec2 pixel = vec2(gl_FragCoord.x, AspectScreen.y - gl_FragCoord.y);
         vec2 clipHalf = AspectClip.zw * 0.5;
         float clipDist = roundedBoxSdf(pixel - (AspectClip.xy + clipHalf), clipHalf, vec4(0.0));
         float clipAa = max(fwidth(clipDist), 0.0001);

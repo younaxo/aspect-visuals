@@ -73,12 +73,14 @@ public final class ShapeRenderer {
 
         Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
         BufferBuilder buffer = Tessellator.getInstance()
-                .begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+                .begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
 
-        buffer.vertex(matrix, left, top, 0f).color(fill);
-        buffer.vertex(matrix, left, bottom, 0f).color(fill);
-        buffer.vertex(matrix, right, bottom, 0f).color(fill);
-        buffer.vertex(matrix, right, top, 0f).color(fill);
+        // Координата фигуры кладётся в атрибут вершины: матрица её не трогает,
+        // поэтому сдвиг и масштаб виджета HUD не сбивают поле расстояния
+        buffer.vertex(matrix, left, top, 0f).texture(left, top).color(fill);
+        buffer.vertex(matrix, left, bottom, 0f).texture(left, bottom).color(fill);
+        buffer.vertex(matrix, right, bottom, 0f).texture(right, bottom).color(fill);
+        buffer.vertex(matrix, right, top, 0f).texture(right, top).color(fill);
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
         RenderSystem.disableBlend();
