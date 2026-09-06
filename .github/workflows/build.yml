@@ -47,34 +47,6 @@ jobs:
       - name: Build
         run: ./gradlew build --stacktrace
 
-      # Временный шаг: выясняет, как подключается размытие фона в 1.21.4.
-      # Удаляется, как только эффект реализован.
-      - name: Разведка размытия
-        if: always()
-        run: |
-          set +e
-          NAMED=""
-          for J in $(find ~/.gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -viE "sources|javadoc"); do
-            if unzip -l "$J" 2>/dev/null | grep -q "net/minecraft/client/gui/screen/Screen.class"; then NAMED="$J"; break; fi
-          done
-          echo "== Screen: фон и размытие"
-          javap -p -cp "$NAMED" net.minecraft.client.gui.screen.Screen 2>&1 | grep -iE "blur|background|darken|render" | head -20
-
-          echo "== GameRenderer: размытие и пост-эффекты"
-          javap -p -cp "$NAMED" net.minecraft.client.render.GameRenderer 2>&1 | grep -iE "blur|postProcess|PostEffect" | head -20
-
-          echo "== GameOptions: настройка размытия меню"
-          javap -p -cp "$NAMED" net.minecraft.client.option.GameOptions 2>&1 | grep -iE "blur" | head -10
-
-          echo "== PostEffectProcessor"
-          javap -p -cp "$NAMED" net.minecraft.client.gl.PostEffectProcessor 2>&1 | head -20
-
-          echo "== ShaderLoader.loadPostEffect и ванильный blur"
-          javap -p -cp "$NAMED" net.minecraft.client.gl.ShaderLoader 2>&1 | grep -i post | head -5
-          CLIENT=/home/runner/.gradle/caches/fabric-loom/1.21.4/minecraft-client.jar
-          unzip -l "$CLIENT" 2>/dev/null | grep -iE "post_effect|shaders/post/blur|blur" | head -10
-          exit 0
-
       - name: Upload jar
         uses: actions/upload-artifact@v4
         with:

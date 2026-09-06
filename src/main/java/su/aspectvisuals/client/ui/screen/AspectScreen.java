@@ -111,9 +111,7 @@ public class AspectScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Базовый фон уже размывает сцену и затемняет её, поверх кладём оверлей из макета
-        super.renderBackground(context, mouseX, mouseY, delta);
-        context.fill(0, 0, width, height, AspectColors.BACKGROUND_OVERLAY);
+        Backdrop.render(context, width, height);
 
         if (view != null) {
             view.render(context, mouseX, mouseY, delta);
